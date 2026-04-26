@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --yume-red: #E8162B;
+  --yume-red-dark: #B01020;
+  --yume-red-light: #FF4458;
+  --yume-black: #0F0F0F;
+  --yume-dark: #1A1A1A;
+  --yume-card: #242424;
+  --yume-border: #333333;
+  --yume-text: #F0F0F0;
+  --yume-muted: #888888;
+  --yume-gold: #FFD700;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--yume-black);
+  color: var(--yume-text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+}
+
+.font-manga {
+  font-family: 'Bangers', cursive;
+  letter-spacing: 0.05em;
+}
+
+/* Scrollbar custom */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--yume-dark); }
+::-webkit-scrollbar-thumb { background: var(--yume-red); border-radius: 3px; }
+
+/* Stato badge colors */
+.stato-da-cercare   { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
+.stato-ordinato     { background: #0ea5e922; color: #38bdf8; border: 1px solid #0ea5e944; }
+.stato-arrivato     { background: #d9770622; color: #fb923c; border: 1px solid #d9770644; }
+.stato-completato   { background: #16a34a22; color: #4ade80; border: 1px solid #16a34a44; }
+
+/* Pagamento badge */
+.pag-pagato    { background: #16a34a22; color: #4ade80; border: 1px solid #16a34a44; }
+.pag-da-saldare { background: #dc262622; color: #f87171; border: 1px solid #dc262644; }
+
+/* Animazioni */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn { animation: fadeIn 0.3s ease forwards; }
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,22,43,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(232,22,43,0); }
+}
+.pulse-red { animation: pulse-red 2s infinite; }

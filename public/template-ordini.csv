@@ -1,0 +1,3 @@
+data,nome_cliente,contatto,tipo_ordine,nome_articolo,quantita,costo,prezzo_vendita,stato,fornitore,pagamento,note
+23/04/2026,Mario Rossi,3331234567,online,One Piece Vol. 1,1,3.50,5.90,completato,manicomics,pagato,
+23/04/2026,Giulia Bianchi,@giulia_ig,in store,Naruto Vol. 5,2,4.00,7.50,arrivato,starshop,da saldare,cliente abituale
