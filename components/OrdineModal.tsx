@@ -39,9 +39,9 @@ const emptyForm: FormState = {
 }
 
 export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
-  const [form, setForm]     = useState<FormState>(emptyForm)
+  const [form, setForm]       = useState<FormState>(emptyForm)
   const [loading, setLoading] = useState(false)
-  const [error, setError]   = useState('')
+  const [error, setError]     = useState('')
 
   useEffect(() => {
     if (ordine) {
@@ -98,152 +98,172 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
     onSaved()
   }
 
-  const inputCls = "w-full bg-[#0F0F0F] border border-[#444] text-white rounded-xl px-4 py-3 text-base focus:outline-none focus:border-[#E8162B] transition-colors"
-  const labelCls = "block text-xs text-[#888] font-semibold uppercase tracking-wider mb-1.5"
+  const inp: React.CSSProperties = {
+    width: '100%',
+    background: '#0F0F0F',
+    border: '1px solid #444',
+    color: 'white',
+    borderRadius: '10px',
+    padding: '12px 14px',
+    fontSize: '16px',
+    outline: 'none',
+    boxSizing: 'border-box',
+  }
+
+  const lbl: React.CSSProperties = {
+    display: 'block',
+    fontSize: '11px',
+    color: '#888',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    marginBottom: '6px',
+  }
+
+  const row: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '14px',
+  }
+
+  const full: React.CSSProperties = {
+    gridColumn: '1 / -1',
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end md:justify-center md:items-center bg-black/80 backdrop-blur-sm">
-      
-      {/* Backdrop click per chiudere */}
-      <div className="absolute inset-0" onClick={onClose} />
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 50,
+      display: 'flex', flexDirection: 'column',
+      justifyContent: 'flex-end',
+      background: 'rgba(0,0,0,0.85)',
+    }}>
+      {/* Backdrop */}
+      <div style={{ position: 'absolute', inset: 0 }} onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-[#1A1A1A] w-full md:max-w-2xl md:rounded-2xl rounded-t-3xl flex flex-col"
-        style={{ maxHeight: '92vh' }}>
-
-        {/* Handle mobile */}
-        <div className="md:hidden flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-[#444] rounded-full" />
+      <div style={{
+        position: 'relative',
+        background: '#1A1A1A',
+        width: '100%',
+        maxWidth: '680px',
+        margin: '0 auto',
+        borderRadius: '20px 20px 0 0',
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: '90vh',
+      }}>
+        {/* Handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+          <div style={{ width: 40, height: 4, background: '#444', borderRadius: 99 }} />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#333]">
-          <h2 className="font-manga text-2xl text-[#E8162B]">
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 20px 16px', borderBottom: '1px solid #333',
+        }}>
+          <span style={{ fontFamily: 'Bangers, cursive', fontSize: 26, color: '#E8162B', letterSpacing: 2 }}>
             {ordine ? 'MODIFICA ORDINE' : 'NUOVO ORDINE'}
-          </h2>
-          <button onClick={onClose}
-            className="p-2 rounded-xl bg-[#242424] text-[#888] hover:text-white transition-colors">
+          </span>
+          <button onClick={onClose} style={{
+            background: '#242424', border: 'none', color: '#888',
+            borderRadius: 10, padding: '8px', cursor: 'pointer', display: 'flex',
+          }}>
             <X size={20} />
           </button>
         </div>
 
-        {/* Form scrollabile */}
-        <div className="overflow-y-auto flex-1 px-5 py-4">
-          <div className="grid grid-cols-2 gap-4">
+        {/* Form */}
+        <div style={{ overflowY: 'auto', flex: 1, padding: '16px 20px' }}>
+          <div style={row}>
 
-            <div>
-              <label className={labelCls}>Data</label>
-              <input type="date" className={inputCls}
-                value={form.data} onChange={e => set('data', e.target.value)} />
+            <div><label style={lbl}>Data</label>
+              <input type="date" style={inp} value={form.data} onChange={e => set('data', e.target.value)} />
             </div>
 
-            <div>
-              <label className={labelCls}>Tipo ordine</label>
-              <select className={inputCls}
-                value={form.tipo_ordine} onChange={e => set('tipo_ordine', e.target.value)}>
+            <div><label style={lbl}>Tipo ordine</label>
+              <select style={inp} value={form.tipo_ordine} onChange={e => set('tipo_ordine', e.target.value)}>
                 {TIPI.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
 
-            <div>
-              <label className={labelCls}>Nome cliente *</label>
-              <input className={inputCls}
-                value={form.nome_cliente} onChange={e => set('nome_cliente', e.target.value)}
-                placeholder="Mario Rossi" />
+            <div><label style={lbl}>Nome cliente *</label>
+              <input style={inp} value={form.nome_cliente} onChange={e => set('nome_cliente', e.target.value)} placeholder="Mario Rossi" />
             </div>
 
-            <div>
-              <label className={labelCls}>Contatto</label>
-              <input className={inputCls}
-                value={form.contatto} onChange={e => set('contatto', e.target.value)}
-                placeholder="Tel / Instagram" />
+            <div><label style={lbl}>Contatto</label>
+              <input style={inp} value={form.contatto} onChange={e => set('contatto', e.target.value)} placeholder="Tel / Instagram" />
             </div>
 
-            <div className="col-span-2">
-              <label className={labelCls}>Nome articolo *</label>
-              <input className={inputCls}
-                value={form.nome_articolo} onChange={e => set('nome_articolo', e.target.value)}
-                placeholder="One Piece Vol. 1..." />
+            <div style={full}><label style={lbl}>Nome articolo *</label>
+              <input style={inp} value={form.nome_articolo} onChange={e => set('nome_articolo', e.target.value)} placeholder="One Piece Vol. 1..." />
             </div>
 
-            <div>
-              <label className={labelCls}>Quantità</label>
-              <input type="number" min={1} className={inputCls}
-                value={form.quantita} onChange={e => set('quantita', e.target.value)} />
+            <div><label style={lbl}>Quantità</label>
+              <input type="number" min={1} style={inp} value={form.quantita} onChange={e => set('quantita', e.target.value)} />
             </div>
 
-            <div>
-              <label className={labelCls}>Stato</label>
-              <select className={inputCls}
-                value={form.stato} onChange={e => set('stato', e.target.value)}>
+            <div><label style={lbl}>Stato</label>
+              <select style={inp} value={form.stato} onChange={e => set('stato', e.target.value)}>
                 {STATI.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
 
-            <div>
-              <label className={labelCls}>Costo acquisto (€)</label>
-              <input type="number" step="0.01" className={inputCls}
-                value={form.costo} onChange={e => set('costo', e.target.value)}
-                placeholder="0.00" />
+            <div><label style={lbl}>Costo acquisto (€)</label>
+              <input type="number" step="0.01" style={inp} value={form.costo} onChange={e => set('costo', e.target.value)} placeholder="0.00" />
             </div>
 
-            <div>
-              <label className={labelCls}>Prezzo vendita (€)</label>
-              <input type="number" step="0.01" className={inputCls}
-                value={form.prezzo_vendita} onChange={e => set('prezzo_vendita', e.target.value)}
-                placeholder="0.00" />
+            <div><label style={lbl}>Prezzo vendita (€)</label>
+              <input type="number" step="0.01" style={inp} value={form.prezzo_vendita} onChange={e => set('prezzo_vendita', e.target.value)} placeholder="0.00" />
             </div>
 
-            <div className={form.fornitore === 'altro' ? '' : 'col-span-2'}>
-              <label className={labelCls}>Fornitore</label>
-              <select className={inputCls}
-                value={form.fornitore} onChange={e => set('fornitore', e.target.value)}>
+            <div style={form.fornitore === 'altro' ? {} : full}>
+              <label style={lbl}>Fornitore</label>
+              <select style={inp} value={form.fornitore} onChange={e => set('fornitore', e.target.value)}>
                 {FORNITORI.map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
 
             {form.fornitore === 'altro' && (
-              <div>
-                <label className={labelCls}>Specifica fornitore</label>
-                <input className={inputCls}
-                  value={form.fornitore_custom} onChange={e => set('fornitore_custom', e.target.value)}
-                  placeholder="Nome fornitore..." />
+              <div><label style={lbl}>Specifica fornitore</label>
+                <input style={inp} value={form.fornitore_custom} onChange={e => set('fornitore_custom', e.target.value)} placeholder="Nome fornitore..." />
               </div>
             )}
 
-            <div className="col-span-2">
-              <label className={labelCls}>Pagamento</label>
-              <select className={inputCls}
-                value={form.pagamento} onChange={e => set('pagamento', e.target.value)}>
+            <div style={full}><label style={lbl}>Pagamento</label>
+              <select style={inp} value={form.pagamento} onChange={e => set('pagamento', e.target.value)}>
                 {PAGAMENTI.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
 
-            <div className="col-span-2">
-              <label className={labelCls}>Note</label>
-              <textarea className={`${inputCls} resize-none`} rows={3}
-                value={form.note} onChange={e => set('note', e.target.value)}
-                placeholder="Note libere..." />
+            <div style={full}><label style={lbl}>Note</label>
+              <textarea style={{ ...inp, resize: 'none' }} rows={3}
+                value={form.note} onChange={e => set('note', e.target.value)} placeholder="Note libere..." />
             </div>
 
           </div>
         </div>
 
-        {/* Footer fisso */}
-        <div className="px-5 py-4 border-t border-[#333]">
-          {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
-          <div className="flex gap-3">
-            <button onClick={onClose}
-              className="flex-1 py-4 rounded-xl border border-[#444] text-[#888] hover:text-white font-bold text-base transition-all">
+        {/* Footer */}
+        <div style={{ padding: '16px 20px', borderTop: '1px solid #333' }}>
+          {error && <p style={{ color: '#f87171', fontSize: 14, marginBottom: 12 }}>{error}</p>}
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button onClick={onClose} style={{
+              flex: 1, padding: '16px', borderRadius: 12,
+              border: '1px solid #444', background: 'transparent',
+              color: '#888', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+            }}>
               Annulla
             </button>
-            <button onClick={handleSave} disabled={loading}
-              className="flex-1 py-4 rounded-xl bg-[#E8162B] hover:bg-[#B01020] text-white font-bold text-base transition-all disabled:opacity-50">
+            <button onClick={handleSave} disabled={loading} style={{
+              flex: 1, padding: '16px', borderRadius: 12,
+              border: 'none', background: loading ? '#888' : '#E8162B',
+              color: 'white', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+            }}>
               {loading ? 'Salvataggio...' : ordine ? 'Aggiorna' : 'Crea Ordine'}
             </button>
           </div>
         </div>
-
       </div>
     </div>
   )
