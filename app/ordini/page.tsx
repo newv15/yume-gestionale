@@ -4,36 +4,59 @@ import { supabase, Ordine } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import OrdineModal from '@/components/OrdineModal'
 import ImportCSV from '@/components/ImportCSV'
-import { Plus, Search, Filter, Pencil, Trash2, X, Upload } from 'lucide-react'
+import { Plus, Search, Filter, Pencil, Trash2, X, Upload, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 
-const STATI = ['', 'da cercare', 'ordinato', 'arrivato', 'completato']
+const STATI     = ['', 'da cercare', 'ordinato', 'arrivato', 'completato']
 const FORNITORI = ['', 'manicomics', 'starshop', 'terminal', 'second hand', 'cubex', 'altro']
 const PAGAMENTI = ['', 'pagato', 'da saldare']
-const TIPI = ['', 'online', 'in store']
+const TIPI      = ['', 'online', 'in store']
+
+type SortField = 'data' | 'nome_cliente' | 'nome_articolo' | 'quantita' | 'stato' | 'fornitore' | 'pagamento' | 'tot_prezzo_vendita'
+type SortDir   = 'asc' | 'desc'
 
 export default function OrdiniPage() {
-  const [ordini, setOrdini] = useState<Ordine[]>([])
-  const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(false)
-  const [editing, setEditing] = useState<Ordine | null>(null)
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [ordini, setOrdini]       = useState<Ordine[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [modal, setModal]         = useState(false)
+  const [editing, setEditing]     = useState<Ordine | null>(null)
+  const [deleting, setDeleting]   = useState<string | null>(null)
   const [importModal, setImportModal] = useState(false)
 
   // Filtri
-  const [search, setSearch] = useState('')
-  const [fStato, setFStato] = useState('')
+  const [search, setSearch]       = useState('')
+  const [fStato, setFStato]       = useState('')
   const [fFornitore, setFFornitore] = useState('')
   const [fPagamento, setFPagamento] = useState('')
-  const [fTipo, setFTipo] = useState('')
+  const [fTipo, setFTipo]         = useState('')
   const [showFilters, setShowFilters] = useState(false)
+
+  // Ordinamento
+  const [sortField, setSortField] = useState<SortField>('data')
+  const [sortDir, setSortDir]     = useState<SortDir>('desc')
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDir('asc')
+    }
+  }
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ChevronsUpDown size={12} className="text-[#555]" />
+    return sortDir === 'asc'
+      ? <ChevronUp size={12} className="text-[#E8162B]" />
+      : <ChevronDown size={12} className="text-[#E8162B]" />
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
-    let q = supabase.from('ordini').select('*').order('created_at', { ascending: false })
-    if (fStato) q = q.eq('stato', fStato)
+    let q = supabase.from('ordini').select('*').order(sortField, { ascending: sortDir === 'asc' })
+    if (fStato)    q = q.eq('stato', fStato)
     if (fFornitore) q = q.eq('fornitore', fFornitore)
     if (fPagamento) q = q.eq('pagamento', fPagamento)
-    if (fTipo) q = q.eq('tipo_ordine', fTipo)
+    if (fTipo)     q = q.eq('tipo_ordine', fTipo)
     const { data } = await q
     let result = data || []
     if (search) {
@@ -46,7 +69,7 @@ export default function OrdiniPage() {
     }
     setOrdini(result)
     setLoading(false)
-  }, [search, fStato, fFornitore, fPagamento, fTipo])
+  }, [search, fStato, fFornitore, fPagamento, fTipo, sortField, sortDir])
 
   useEffect(() => { load() }, [load])
 
@@ -61,8 +84,8 @@ export default function OrdiniPage() {
   const statoBadge = (s: string) => {
     const map: Record<string, string> = {
       'da cercare': 'stato-da-cercare',
-      'ordinato': 'stato-ordinato',
-      'arrivato': 'stato-arrivato',
+      'ordinato':   'stato-ordinato',
+      'arrivato':   'stato-arrivato',
       'completato': 'stato-completato',
     }
     return <span className={`text-xs px-2 py-1 rounded-full font-bold whitespace-nowrap ${map[s] || ''}`}>{s}</span>
@@ -73,6 +96,18 @@ export default function OrdiniPage() {
   )
 
   const activeFilters = [fStato, fFornitore, fPagamento, fTipo].filter(Boolean).length
+
+  type ColHeader = { label: string; field: SortField }
+  const colHeaders: ColHeader[] = [
+    { label: 'Data',      field: 'data' },
+    { label: 'Cliente',   field: 'nome_cliente' },
+    { label: 'Articolo',  field: 'nome_articolo' },
+    { label: 'Qtà',       field: 'quantita' },
+    { label: 'Stato',     field: 'stato' },
+    { label: 'Fornitore', field: 'fornitore' },
+    { label: 'Pagamento', field: 'pagamento' },
+    { label: 'Tot €',     field: 'tot_prezzo_vendita' },
+  ]
 
   return (
     <div className="min-h-screen bg-[#0F0F0F]">
@@ -134,10 +169,10 @@ export default function OrdiniPage() {
           {showFilters && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 animate-fadeIn">
               {[
-                { label: 'Stato',      val: fStato,     set: setFStato,     opts: STATI },
-                { label: 'Fornitore',  val: fFornitore, set: setFFornitore, opts: FORNITORI },
-                { label: 'Pagamento',  val: fPagamento, set: setFPagamento, opts: PAGAMENTI },
-                { label: 'Tipo',       val: fTipo,      set: setFTipo,      opts: TIPI },
+                { label: 'Stato',     val: fStato,     set: setFStato,     opts: STATI },
+                { label: 'Fornitore', val: fFornitore, set: setFFornitore, opts: FORNITORI },
+                { label: 'Pagamento', val: fPagamento, set: setFPagamento, opts: PAGAMENTI },
+                { label: 'Tipo',      val: fTipo,      set: setFTipo,      opts: TIPI },
               ].map(f => (
                 <select key={f.label}
                   className="bg-[#1A1A1A] border border-[#333] text-sm text-white rounded-xl px-3 py-2 focus:outline-none focus:border-[#E8162B]"
@@ -156,9 +191,17 @@ export default function OrdiniPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#333] text-[#888] text-xs uppercase tracking-wider">
-                  {['Data','Cliente','Articolo','Qtà','Stato','Fornitore','Pagamento','Tot €',''].map(h => (
-                    <th key={h} className="px-4 py-3 text-left font-semibold whitespace-nowrap">{h}</th>
+                  {colHeaders.map(({ label, field }) => (
+                    <th key={field}
+                      onClick={() => handleSort(field)}
+                      className="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer hover:text-white transition-colors select-none">
+                      <div className="flex items-center gap-1">
+                        {label}
+                        <SortIcon field={field} />
+                      </div>
+                    </th>
                   ))}
+                  <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#242424]">
@@ -172,7 +215,7 @@ export default function OrdiniPage() {
                 {!loading && ordini.length === 0 && (
                   <tr>
                     <td colSpan={9} className="text-center py-12 text-[#888]">
-                      Nessun ordine trovato — clicca &quot;Nuovo&quot; per aggiungerne uno
+                      Nessun ordine trovato
                     </td>
                   </tr>
                 )}
@@ -261,7 +304,6 @@ export default function OrdiniPage() {
 
       </main>
 
-      {/* Modal nuovo/modifica ordine */}
       {modal && (
         <OrdineModal
           ordine={editing}
@@ -270,14 +312,12 @@ export default function OrdiniPage() {
         />
       )}
 
-      {/* Modal import CSV */}
       {importModal && (
         <ImportCSV
           onClose={() => setImportModal(false)}
           onDone={() => { setImportModal(false); load() }}
         />
       )}
-
     </div>
   )
 }

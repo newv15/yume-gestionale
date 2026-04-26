@@ -100,7 +100,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-2 gap-3 mb-8">
               <StatCard label="Da saldare"         value={stats.da_saldare}  icon={Clock}       color="bg-red-800"    sub="ordini non pagati" />
-              <StatCard label="Vendite completate"  value={stats.tot_vendite} icon={TrendingUp}  color="bg-[#E8162B]"  sub="€ totali" />
+              <StatCard label="Vendite completate"  value={Math.round(stats.tot_vendite * 100) / 100} icon={TrendingUp}  color="bg-[#E8162B]"  sub="€ totali" />
             </div>
 
             <div className="bg-[#1A1A1A] border border-[#333] rounded-2xl overflow-hidden">

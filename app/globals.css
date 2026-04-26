@@ -60,3 +60,30 @@ body {
   50%       { box-shadow: 0 0 0 8px rgba(232,22,43,0); }
 }
 .pulse-red { animation: pulse-red 2s infinite; }
+
+/* LIGHT THEME */
+.light {
+  --bg-main:   #F5F5F5;
+  --bg-card:   #FFFFFF;
+  --bg-dark:   #EEEEEE;
+  --border:    #DDDDDD;
+  --text:      #111111;
+  --muted:     #666666;
+}
+
+.light body {
+  background-color: var(--bg-main);
+  color: var(--text);
+}
+
+.light .bg-\[\#0F0F0F\] { background-color: var(--bg-main) !important; }
+.light .bg-\[\#1A1A1A\] { background-color: var(--bg-card) !important; }
+.light .bg-\[\#242424\] { background-color: var(--bg-dark) !important; }
+.light .border-\[\#333\] { border-color: var(--border) !important; }
+.light .border-\[\#444\] { border-color: #CCCCCC !important; }
+.light .text-white       { color: #111111 !important; }
+.light .text-\[\#888\]   { color: #666666 !important; }
+.light .text-\[\#666\]   { color: #888888 !important; }
+.light .divide-\[\#2a2a2a\] > * { border-color: #DDDDDD !important; }
+.light .divide-\[\#242424\] > * { border-color: #EEEEEE !important; }
+.light .placeholder-\[\#666\]::placeholder { color: #AAAAAA !important; }

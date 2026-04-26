@@ -1,16 +1,24 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ShoppingBag, Users, LayoutDashboard } from 'lucide-react'
+import { ShoppingBag, Users, LayoutDashboard, Sun, Moon } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
 const links = [
-  { href: '/',         label: 'Dashboard',  icon: LayoutDashboard },
-  { href: '/ordini',   label: 'Ordini',     icon: ShoppingBag },
-  { href: '/clienti',  label: 'Clienti',    icon: Users },
+  { href: '/',        label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/ordini',  label: 'Ordini',    icon: ShoppingBag },
+  { href: '/clienti', label: 'Clienti',   icon: Users },
 ]
 
 export default function Navbar() {
   const path = usePathname()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark')
+
   return (
     <>
       {/* TOP BAR desktop */}
@@ -19,7 +27,7 @@ export default function Navbar() {
           <span className="font-manga text-3xl text-[#E8162B] tracking-widest">YUME</span>
           <span className="text-xs text-[#888] font-semibold uppercase tracking-widest mt-1">Gestionale</span>
         </div>
-        <nav className="flex gap-2">
+        <nav className="flex gap-2 items-center">
           {links.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all
@@ -30,6 +38,13 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          {/* Toggle tema */}
+          {mounted && (
+            <button onClick={toggleTheme}
+              className="ml-2 p-2 rounded-lg border border-[#333] text-[#888] hover:text-white hover:border-[#E8162B] transition-all">
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+          )}
         </nav>
       </header>
 
@@ -43,6 +58,13 @@ export default function Navbar() {
             {label}
           </Link>
         ))}
+        {mounted && (
+          <button onClick={toggleTheme}
+            className="flex-1 flex flex-col items-center py-3 gap-1 text-xs font-bold text-[#888]">
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            {theme === 'dark' ? 'Light' : 'Dark'}
+          </button>
+        )}
       </nav>
     </>
   )
