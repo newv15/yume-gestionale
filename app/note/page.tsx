@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
-import { Plus, Check, Trash2, X } from 'lucide-react'
+import { Plus, Check, X } from 'lucide-react'
 
 type Nota = {
   id: string
