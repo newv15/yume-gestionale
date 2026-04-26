@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ShoppingBag, Users, LayoutDashboard, Sun, Moon } from 'lucide-react'
+import { ShoppingBag, Users, LayoutDashboard, Sun, Moon, StickyNote } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 
@@ -9,6 +9,7 @@ const links = [
   { href: '/',        label: 'Dashboard', icon: LayoutDashboard },
   { href: '/ordini',  label: 'Ordini',    icon: ShoppingBag },
   { href: '/clienti', label: 'Clienti',   icon: Users },
+  { href: '/note',    label: 'Note',      icon: StickyNote },
 ]
 
 export default function Navbar() {
@@ -49,23 +50,24 @@ export default function Navbar() {
       </header>
 
       {/* BOTTOM BAR mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1A1A1A] border-t border-[#333] flex">
-        {links.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href}
-            className={`flex-1 flex flex-col items-center py-3 gap-1 text-xs font-bold transition-all
-              ${path === href ? 'text-[#E8162B]' : 'text-[#888]'}`}>
-            <Icon size={20} />
-            {label}
-          </Link>
-        ))}
-        {mounted && (
-          <button onClick={toggleTheme}
-            className="flex-1 flex flex-col items-center py-3 gap-1 text-xs font-bold text-[#888]">
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            {theme === 'dark' ? 'Light' : 'Dark'}
-          </button>
-        )}
-      </nav>
+      {/* BOTTOM BAR mobile */}
+<nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1A1A1A] border-t border-[#333] flex items-stretch">
+  {links.map(({ href, label, icon: Icon }) => (
+    <Link key={href} href={href}
+      className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold transition-all min-w-0
+        ${path === href ? 'text-[#E8162B]' : 'text-[#888]'}`}>
+      <Icon size={20} />
+      <span className="truncate">{label}</span>
+    </Link>
+  ))}
+  {mounted && (
+    <button onClick={toggleTheme}
+      className="flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-bold text-[#888] min-w-0">
+      {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+    </button>
+  )}
+</nav>
     </>
   )
 }
