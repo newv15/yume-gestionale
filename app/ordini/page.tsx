@@ -1,4 +1,5 @@
 'use client'
+import ExportTools from '@/components/ExportTools'
 import { useEffect, useState, useCallback } from 'react'
 import { supabase, Ordine } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
@@ -122,17 +123,21 @@ export default function OrdiniPage() {
             </h1>
             <p className="text-[#888] text-xs mt-0.5">{ordini.length} risultati</p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => setImportModal(true)}
-              className="flex items-center gap-2 border border-[#444] hover:border-[#E8162B] text-[#888] hover:text-white px-3 py-2.5 rounded-xl font-bold text-sm transition-all">
-              <Upload size={16} />
-              <span className="hidden md:inline">Import CSV</span>
-            </button>
-            <button onClick={() => { setEditing(null); setModal(true) }}
-              className="flex items-center gap-2 bg-[#E8162B] hover:bg-[#B01020] text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all pulse-red">
-              <Plus size={18} /> Nuovo
-            </button>
-          </div>
+         <div className="flex gap-2">
+  <ExportTools
+    ordini={ordini}
+    filtroAttivo={fStato || fFornitore || fPagamento || fTipo || ''}
+  />
+  <button onClick={() => setImportModal(true)}
+    className="flex items-center gap-2 border border-[#444] hover:border-[#E8162B] text-[#888] hover:text-white px-3 py-2.5 rounded-xl font-bold text-sm transition-all">
+    <Upload size={16} />
+    <span className="hidden md:inline">Import CSV</span>
+  </button>
+  <button onClick={() => { setEditing(null); setModal(true) }}
+    className="flex items-center gap-2 bg-[#E8162B] hover:bg-[#B01020] text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all pulse-red">
+    <Plus size={18} /> Nuovo
+  </button>
+</div>
         </div>
 
         {/* Search + Filtri */}
