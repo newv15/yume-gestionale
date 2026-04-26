@@ -127,3 +127,15 @@ body {
     padding-bottom: calc(6rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Blocca scroll orizzontale globale */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Fix card mobile che escono dai bordi */
+.md\:hidden > div {
+  max-width: 100%;
+  box-sizing: border-box;
+}
