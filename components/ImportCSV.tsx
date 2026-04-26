@@ -38,6 +38,18 @@ const TIPI_VALIDI = ['online', 'in store']
 function normalizza(val: string | undefined, opzioni: string[], fallback: string): string {
   if (!val) return fallback
   const v = val.trim().toLowerCase()
+  
+  // Mappa alias comuni per i fornitori
+  const alias: Record<string, string> = {
+    'manicomix': 'manicomics',
+    'manicomic': 'manicomics',
+    'star shop': 'starshop',
+    'star_shop': 'starshop',
+    'second-hand': 'second hand',
+    'secondhand': 'second hand',
+  }
+  
+  if (alias[v]) return alias[v]
   return opzioni.find(o => o === v) || fallback
 }
 
