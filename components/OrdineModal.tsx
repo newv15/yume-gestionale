@@ -24,7 +24,7 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
   const refData           = useState(ordine?.data || new Date().toISOString().split('T')[0])
   const refNomeCliente    = useState(ordine?.nome_cliente || '')
   const refContatto       = useState(ordine?.contatto || '')
-  const refTipoOrdine     = useState(ordine?.tipo_ordine || 'in store')
+  const refTipoOrdine = useState<'online' | 'in store'>(ordine?.tipo_ordine || 'in store')
   const refNomeArticolo   = useState(ordine?.nome_articolo || '')
   const refQuantita       = useState(String(ordine?.quantita || 1))
   const refCosto          = useState(ordine?.costo != null ? String(ordine.costo) : '')
