@@ -31,7 +31,7 @@ type Risultato = {
 }
 
 const STATI_VALIDI = ['da cercare', 'ordinato', 'arrivato', 'completato']
-const FORNITORI_VALIDI = ['manicomics', 'starshop', 'terminal', 'second hand', 'cubex', 'altro']
+const FORNITORI_VALIDI = ['manicomics', 'starshop', 'terminal', 'second hand', 'cubex', 'cardverse', 'altro']
 const PAGAMENTI_VALIDI = ['pagato', 'da saldare']
 const TIPI_VALIDI = ['online', 'in store']
 

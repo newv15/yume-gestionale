@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X } from 'lucide-react'
 import { supabase, Ordine } from '@/lib/supabase'
 
@@ -9,89 +9,71 @@ type Props = {
   onSaved: () => void
 }
 
-type FormState = {
-  data: string
-  nome_cliente: string
-  contatto: string
-  tipo_ordine: string
-  nome_articolo: string
-  quantita: number | string
-  costo: number | string
-  prezzo_vendita: number | string
-  stato: string
-  fornitore: string
-  fornitore_custom: string
-  pagamento: string
-  note: string
-}
-
 const STATI     = ['da cercare', 'ordinato', 'arrivato', 'completato']
-const FORNITORI = ['manicomics', 'starshop', 'terminal', 'second hand', 'cubex', 'altro']
+const FORNITORI = ['manicomics', 'starshop', 'terminal', 'second hand', 'cubex', 'cardverse', 'altro']
 const TIPI      = ['online', 'in store']
 const PAGAMENTI = ['da saldare', 'pagato']
 
-const emptyForm: FormState = {
-  data: new Date().toISOString().split('T')[0],
-  nome_cliente: '', contatto: '', tipo_ordine: 'online',
-  nome_articolo: '', quantita: 1, costo: '', prezzo_vendita: '',
-  stato: 'da cercare', fornitore: 'manicomics', fornitore_custom: '',
-  pagamento: 'da saldare', note: ''
-}
-
 export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
-  const [form, setForm]       = useState<FormState>(emptyForm)
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [fornitore, setFornitore]     = useState(ordine?.fornitore || 'manicomics')
+  const [showCustom, setShowCustom]   = useState(false)
+
+  // Refs per tutti i campi — nessun re-render al typing
+  const refData           = useState(ordine?.data || new Date().toISOString().split('T')[0])
+  const refNomeCliente    = useState(ordine?.nome_cliente || '')
+  const refContatto       = useState(ordine?.contatto || '')
+  const refTipoOrdine     = useState(ordine?.tipo_ordine || 'in store')
+  const refNomeArticolo   = useState(ordine?.nome_articolo || '')
+  const refQuantita       = useState(String(ordine?.quantita || 1))
+  const refCosto          = useState(ordine?.costo != null ? String(ordine.costo) : '')
+  const refPrezzoVendita  = useState(ordine?.prezzo_vendita != null ? String(ordine.prezzo_vendita) : '')
+  const refStato          = useState(ordine?.stato || 'da cercare')
+  const refFornitoreCustom = useState(ordine?.fornitore_custom || '')
+  const refPagamento      = useState(ordine?.pagamento || 'da saldare')
+  const refNote           = useState(ordine?.note || '')
+
+  const [data,           setData]           = refData
+  const [nomeCliente,    setNomeCliente]    = refNomeCliente
+  const [contatto,       setContatto]       = refContatto
+  const [tipoOrdine,     setTipoOrdine]     = refTipoOrdine
+  const [nomeArticolo,   setNomeArticolo]   = refNomeArticolo
+  const [quantita,       setQuantita]       = refQuantita
+  const [costo,          setCosto]          = refCosto
+  const [prezzoVendita,  setPrezzoVendita]  = refPrezzoVendita
+  const [stato,          setStato]          = refStato
+  const [fornitoreCustom, setFornitoreCustom] = refFornitoreCustom
+  const [pagamento,      setPagamento]      = refPagamento
+  const [note,           setNote]           = refNote
 
   useEffect(() => {
-    // Blocca lo scroll del body quando il modal è aperto
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = '' }
   }, [])
 
   useEffect(() => {
-    if (ordine) {
-      setForm({
-        data: ordine.data,
-        nome_cliente: ordine.nome_cliente,
-        contatto: ordine.contatto ?? '',
-        tipo_ordine: ordine.tipo_ordine,
-        nome_articolo: ordine.nome_articolo,
-        quantita: ordine.quantita,
-        costo: ordine.costo ?? '',
-        prezzo_vendita: ordine.prezzo_vendita ?? '',
-        stato: ordine.stato,
-        fornitore: ordine.fornitore,
-        fornitore_custom: ordine.fornitore_custom ?? '',
-        pagamento: ordine.pagamento,
-        note: ordine.note ?? '',
-      })
-    } else {
-      setForm(emptyForm)
-    }
-  }, [ordine])
+    setShowCustom(fornitore === 'altro')
+  }, [fornitore])
 
-  const set = (k: keyof FormState, v: string | number) =>
-    setForm(p => ({ ...p, [k]: v }))
-
-  const handleSave = async () => {
-    if (!form.nome_articolo.trim()) { setError('Il nome articolo è obbligatorio'); return }
-    if (!form.nome_cliente.trim())  { setError('Il nome cliente è obbligatorio'); return }
+  const handleSave = useCallback(async () => {
+    if (!nomeArticolo.trim()) { setError('Il nome articolo è obbligatorio'); return }
+    if (!nomeCliente.trim())  { setError('Il nome cliente è obbligatorio'); return }
     setLoading(true); setError('')
     const payload = {
-      data: form.data,
-      nome_cliente: form.nome_cliente,
-      contatto: form.contatto || null,
-      tipo_ordine: form.tipo_ordine,
-      nome_articolo: form.nome_articolo,
-      quantita: Number(form.quantita) || 1,
-      costo: form.costo !== '' ? Number(form.costo) : null,
-      prezzo_vendita: form.prezzo_vendita !== '' ? Number(form.prezzo_vendita) : null,
-      stato: form.stato,
-      fornitore: form.fornitore,
-      fornitore_custom: form.fornitore === 'altro' ? form.fornitore_custom : null,
-      pagamento: form.pagamento,
-      note: form.note || null,
+      data,
+      nome_cliente: nomeCliente,
+      contatto: contatto || null,
+      tipo_ordine: tipoOrdine,
+      nome_articolo: nomeArticolo,
+      quantita: Number(quantita) || 1,
+      costo: costo !== '' ? Number(costo) : null,
+      prezzo_vendita: prezzoVendita !== '' ? Number(prezzoVendita) : null,
+      stato,
+      fornitore,
+      fornitore_custom: fornitore === 'altro' ? fornitoreCustom : null,
+      pagamento,
+      note: note || null,
     }
     let err
     if (ordine) {
@@ -102,7 +84,7 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
     setLoading(false)
     if (err) { setError(err.message); return }
     onSaved()
-  }
+  }, [data, nomeCliente, contatto, tipoOrdine, nomeArticolo, quantita, costo, prezzoVendita, stato, fornitore, fornitoreCustom, pagamento, note, ordine, onSaved])
 
   const inp: React.CSSProperties = {
     width: '100%',
@@ -115,6 +97,7 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
     outline: 'none',
     boxSizing: 'border-box',
     WebkitAppearance: 'none',
+    fontFamily: 'Nunito, sans-serif',
   }
 
   const lbl: React.CSSProperties = {
@@ -127,13 +110,6 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
     marginBottom: '8px',
   }
 
-  const Field = ({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) => (
-    <div style={{ gridColumn: full ? '1 / -1' : undefined }}>
-      <label style={lbl}>{label}</label>
-      {children}
-    </div>
-  )
-
   return (
     <div style={{
       position: 'fixed',
@@ -143,7 +119,6 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
       display: 'flex',
       alignItems: 'flex-end',
     }}>
-      {/* Modal — occupa 95% dell'altezza schermo */}
       <div style={{
         width: '100%',
         height: '95vh',
@@ -155,7 +130,7 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
       }}>
 
         {/* Handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px', flexShrink: 0 }}>
           <div style={{ width: 44, height: 5, background: '#555', borderRadius: 99 }} />
         </div>
 
@@ -164,118 +139,140 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '10px 20px 14px', borderBottom: '1px solid #2a2a2a', flexShrink: 0,
         }}>
-          <span style={{
-            fontFamily: 'Bangers, cursive', fontSize: 24,
-            color: '#E8162B', letterSpacing: 2,
-          }}>
+          <span style={{ fontFamily: 'Bangers, cursive', fontSize: 24, color: '#E8162B', letterSpacing: 2 }}>
             {ordine ? 'MODIFICA ORDINE' : 'NUOVO ORDINE'}
           </span>
           <button onClick={onClose} style={{
             background: '#2a2a2a', border: 'none', color: '#888',
             borderRadius: 10, padding: 8, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            display: 'flex', alignItems: 'center',
           }}>
             <X size={20} />
           </button>
         </div>
 
-        {/* Campi — scrollabile */}
+        {/* Campi scrollabili */}
         <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
+          flex: 1, overflowY: 'auto', overflowX: 'hidden',
           padding: '16px 20px',
-          WebkitOverflowScrolling: 'touch',
+          WebkitOverflowScrolling: 'touch' as never,
         }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 16,
-          }}>
-            <Field label="Data">
-              <input type="date" style={inp} value={form.data}
-                onChange={e => set('data', e.target.value)} />
-            </Field>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            <Field label="Tipo ordine">
-              <select style={inp} value={form.tipo_ordine}
-                onChange={e => set('tipo_ordine', e.target.value)}>
-                {TIPI.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </Field>
+            {/* Riga 1 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={lbl}>Data</label>
+                <input type="date" style={inp} defaultValue={data}
+                  onChange={e => setData(e.target.value)} />
+              </div>
+              <div>
+                <label style={lbl}>Tipo ordine</label>
+                <select style={inp} defaultValue={tipoOrdine}
+                  onChange={e => setTipoOrdine(e.target.value)}>
+                  {TIPI.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
 
-            <Field label="Nome cliente *">
-              <input style={inp} value={form.nome_cliente}
-                onChange={e => set('nome_cliente', e.target.value)}
-                placeholder="Mario Rossi" />
-            </Field>
+            {/* Riga 2 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={lbl}>Nome cliente *</label>
+                <input style={inp} defaultValue={nomeCliente}
+                  onChange={e => setNomeCliente(e.target.value)}
+                  placeholder="Mario Rossi"
+                  autoComplete="off" />
+              </div>
+              <div>
+                <label style={lbl}>Contatto</label>
+                <input style={inp} defaultValue={contatto}
+                  onChange={e => setContatto(e.target.value)}
+                  placeholder="Tel / Instagram"
+                  autoComplete="off" />
+              </div>
+            </div>
 
-            <Field label="Contatto">
-              <input style={inp} value={form.contatto}
-                onChange={e => set('contatto', e.target.value)}
-                placeholder="Tel / Instagram" />
-            </Field>
+            {/* Nome articolo */}
+            <div>
+              <label style={lbl}>Nome articolo *</label>
+              <input style={inp} defaultValue={nomeArticolo}
+                onChange={e => setNomeArticolo(e.target.value)}
+                placeholder="One Piece Vol. 1..."
+                autoComplete="off" />
+            </div>
 
-            <Field label="Nome articolo *" full>
-              <input style={inp} value={form.nome_articolo}
-                onChange={e => set('nome_articolo', e.target.value)}
-                placeholder="One Piece Vol. 1..." />
-            </Field>
+            {/* Riga 3 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={lbl}>Quantità</label>
+                <input type="number" min={1} style={inp} defaultValue={quantita}
+                  onChange={e => setQuantita(e.target.value)} />
+              </div>
+              <div>
+                <label style={lbl}>Stato</label>
+                <select style={inp} defaultValue={stato}
+                  onChange={e => setStato(e.target.value)}>
+                  {STATI.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
 
-            <Field label="Quantità">
-              <input type="number" min={1} style={inp} value={form.quantita}
-                onChange={e => set('quantita', e.target.value)} />
-            </Field>
+            {/* Riga 4 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={lbl}>Costo acquisto (€)</label>
+                <input type="number" step="0.01" style={inp} defaultValue={costo}
+                  onChange={e => setCosto(e.target.value)} placeholder="0.00" />
+              </div>
+              <div>
+                <label style={lbl}>Prezzo vendita (€)</label>
+                <input type="number" step="0.01" style={inp} defaultValue={prezzoVendita}
+                  onChange={e => setPrezzoVendita(e.target.value)} placeholder="0.00" />
+              </div>
+            </div>
 
-            <Field label="Stato">
-              <select style={inp} value={form.stato}
-                onChange={e => set('stato', e.target.value)}>
-                {STATI.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </Field>
+            {/* Fornitore */}
+            <div style={{ display: 'grid', gridTemplateColumns: showCustom ? '1fr 1fr' : '1fr', gap: 12 }}>
+              <div>
+                <label style={lbl}>Fornitore</label>
+                <select style={inp} value={fornitore}
+                  onChange={e => setFornitore(e.target.value)}>
+                  {FORNITORI.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+              {showCustom && (
+                <div>
+                  <label style={lbl}>Specifica fornitore</label>
+                  <input style={inp} defaultValue={fornitoreCustom}
+                    onChange={e => setFornitoreCustom(e.target.value)}
+                    placeholder="Nome fornitore..." />
+                </div>
+              )}
+            </div>
 
-            <Field label="Costo acquisto (€)">
-              <input type="number" step="0.01" style={inp} value={form.costo}
-                onChange={e => set('costo', e.target.value)} placeholder="0.00" />
-            </Field>
-
-            <Field label="Prezzo vendita (€)">
-              <input type="number" step="0.01" style={inp} value={form.prezzo_vendita}
-                onChange={e => set('prezzo_vendita', e.target.value)} placeholder="0.00" />
-            </Field>
-
-            <Field label="Fornitore" full={form.fornitore !== 'altro'}>
-              <select style={inp} value={form.fornitore}
-                onChange={e => set('fornitore', e.target.value)}>
-                {FORNITORI.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
-            </Field>
-
-            {form.fornitore === 'altro' && (
-              <Field label="Specifica fornitore">
-                <input style={inp} value={form.fornitore_custom}
-                  onChange={e => set('fornitore_custom', e.target.value)}
-                  placeholder="Nome fornitore..." />
-              </Field>
-            )}
-
-            <Field label="Pagamento" full>
-              <select style={inp} value={form.pagamento}
-                onChange={e => set('pagamento', e.target.value)}>
+            {/* Pagamento */}
+            <div>
+              <label style={lbl}>Pagamento</label>
+              <select style={inp} defaultValue={pagamento}
+                onChange={e => setPagamento(e.target.value)}>
                 {PAGAMENTI.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
-            </Field>
+            </div>
 
-            <Field label="Note" full>
+            {/* Note */}
+            <div>
+              <label style={lbl}>Note</label>
               <textarea style={{ ...inp, resize: 'none' }} rows={4}
-                value={form.note}
-                onChange={e => set('note', e.target.value)}
+                defaultValue={note}
+                onChange={e => setNote(e.target.value)}
                 placeholder="Note libere..." />
-            </Field>
+            </div>
+
           </div>
         </div>
 
-        {/* Footer fisso in fondo */}
+        {/* Footer */}
         <div style={{
           padding: '16px 20px',
           paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
@@ -283,27 +280,27 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
           flexShrink: 0,
           background: '#1A1A1A',
         }}>
-          {error && (
-            <p style={{ color: '#f87171', fontSize: 13, marginBottom: 12 }}>{error}</p>
-          )}
+          {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 12 }}>{error}</p>}
           <div style={{ display: 'flex', gap: 12 }}>
             <button onClick={onClose} style={{
               flex: 1, padding: '17px 0', borderRadius: 14,
               border: '1px solid #444', background: 'transparent',
               color: '#aaa', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+              fontFamily: 'Nunito, sans-serif',
             }}>
               Annulla
             </button>
             <button onClick={handleSave} disabled={loading} style={{
               flex: 1, padding: '17px 0', borderRadius: 14,
-              border: 'none',
-              background: loading ? '#555' : '#E8162B',
+              border: 'none', background: loading ? '#555' : '#E8162B',
               color: 'white', fontWeight: 700, fontSize: 16, cursor: 'pointer',
+              fontFamily: 'Nunito, sans-serif',
             }}>
               {loading ? 'Salvataggio...' : ordine ? 'Aggiorna' : 'Crea Ordine'}
             </button>
           </div>
         </div>
+
       </div>
     </div>
   )

@@ -3,10 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// DEBUG TEMPORANEO - rimuovi dopo aver risolto
-console.log('URL:', supabaseUrl)
-console.log('KEY:', supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'MANCANTE')
-
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
 export type Ordine = {
@@ -23,7 +19,7 @@ export type Ordine = {
   prezzo_vendita: number | null
   tot_prezzo_vendita: number
   stato: 'da cercare' | 'ordinato' | 'arrivato' | 'completato'
-  fornitore: 'manicomics' | 'starshop' | 'terminal' | 'second hand' | 'cubex' | 'altro'
+  fornitore: 'manicomics' | 'starshop' | 'terminal' | 'second hand' | 'cubex' | 'cardverse' | 'altro'
   fornitore_custom: string | null
   pagamento: 'pagato' | 'da saldare'
   note: string | null

@@ -8,7 +8,7 @@ import ImportCSV from '@/components/ImportCSV'
 import { Plus, Search, Filter, Pencil, Trash2, X, Upload, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 
 const STATI     = ['', 'da cercare', 'ordinato', 'arrivato', 'completato']
-const FORNITORI = ['', 'manicomics', 'starshop', 'terminal', 'second hand', 'cubex', 'altro']
+const FORNITORI = ['', 'manicomics', 'starshop', 'terminal', 'second hand', 'cubex', 'cardverse', 'altro']
 const PAGAMENTI = ['', 'pagato', 'da saldare']
 const TIPI      = ['', 'online', 'in store']
 
@@ -24,11 +24,10 @@ export default function OrdiniPage() {
   const [importModal, setImportModal] = useState(false)
 
   // Filtri
-  const [search, setSearch]       = useState('')
-  const [fStato, setFStato]       = useState('')
-  const [fFornitore, setFFornitore] = useState('')
-  const [fPagamento, setFPagamento] = useState('')
-  const [fTipo, setFTipo]         = useState('')
+ const [fStato, setFStato]         = useState<string[]>([])
+const [fFornitore, setFFornitore] = useState<string[]>([])
+const [fPagamento, setFPagamento] = useState<string[]>([])
+const [fTipo, setFTipo]           = useState<string[]>([])
   const [showFilters, setShowFilters] = useState(false)
 
   // Ordinamento
@@ -52,26 +51,25 @@ export default function OrdiniPage() {
   }
 
   const load = useCallback(async () => {
-    setLoading(true)
-    let q = supabase.from('ordini').select('*').order(sortField, { ascending: sortDir === 'asc' })
-    if (fStato)    q = q.eq('stato', fStato)
-    if (fFornitore) q = q.eq('fornitore', fFornitore)
-    if (fPagamento) q = q.eq('pagamento', fPagamento)
-    if (fTipo)     q = q.eq('tipo_ordine', fTipo)
-    const { data } = await q
-    let result = data || []
-    if (search) {
-      const s = search.toLowerCase()
-      result = result.filter(o =>
-        o.nome_articolo.toLowerCase().includes(s) ||
-        o.nome_cliente.toLowerCase().includes(s) ||
-        (o.contatto || '').toLowerCase().includes(s)
-      )
-    }
-    setOrdini(result)
-    setLoading(false)
-  }, [search, fStato, fFornitore, fPagamento, fTipo, sortField, sortDir])
-
+  setLoading(true)
+  let q = supabase.from('ordini').select('*').order(sortField, { ascending: sortDir === 'asc' })
+  if (fStato.length > 0)     q = q.in('stato', fStato)
+  if (fFornitore.length > 0) q = q.in('fornitore', fFornitore)
+  if (fPagamento.length > 0) q = q.in('pagamento', fPagamento)
+  if (fTipo.length > 0)      q = q.in('tipo_ordine', fTipo)
+  const { data } = await q
+  let result = data || []
+  if (search) {
+    const s = search.toLowerCase()
+    result = result.filter(o =>
+      o.nome_articolo.toLowerCase().includes(s) ||
+      o.nome_cliente.toLowerCase().includes(s) ||
+      (o.contatto || '').toLowerCase().includes(s)
+    )
+  }
+  setOrdini(result)
+  setLoading(false)
+}, [search, fStato, fFornitore, fPagamento, fTipo, sortField, sortDir])
   useEffect(() => { load() }, [load])
 
   const handleDelete = async (id: string) => {
@@ -96,7 +94,7 @@ export default function OrdiniPage() {
     <span className={`text-xs px-2 py-1 rounded-full font-bold ${p === 'pagato' ? 'pag-pagato' : 'pag-da-saldare'}`}>{p}</span>
   )
 
-  const activeFilters = [fStato, fFornitore, fPagamento, fTipo].filter(Boolean).length
+  const activeFilters = [fStato, fFornitore, fPagamento, fTipo].filter(a => a.length > 0).length
 
   type ColHeader = { label: string; field: SortField }
   const colHeaders: ColHeader[] = [
@@ -172,22 +170,53 @@ export default function OrdiniPage() {
           </div>
 
           {showFilters && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 animate-fadeIn">
-              {[
-                { label: 'Stato',     val: fStato,     set: setFStato,     opts: STATI },
-                { label: 'Fornitore', val: fFornitore, set: setFFornitore, opts: FORNITORI },
-                { label: 'Pagamento', val: fPagamento, set: setFPagamento, opts: PAGAMENTI },
-                { label: 'Tipo',      val: fTipo,      set: setFTipo,      opts: TIPI },
-              ].map(f => (
-                <select key={f.label}
-                  className="bg-[#1A1A1A] border border-[#333] text-sm text-white rounded-xl px-3 py-2 focus:outline-none focus:border-[#E8162B]"
-                  value={f.val} onChange={e => f.set(e.target.value)}>
-                  <option value="">{f.label}: tutti</option>
-                  {f.opts.filter(Boolean).map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
-              ))}
-            </div>
+  <div className="bg-[#1A1A1A] border border-[#333] rounded-2xl p-4 animate-fadeIn">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {[
+        { label: 'Stato',     vals: fStato,     set: setFStato,     opts: STATI.filter(Boolean) },
+        { label: 'Fornitore', vals: fFornitore, set: setFFornitore, opts: FORNITORI.filter(Boolean) },
+        { label: 'Pagamento', vals: fPagamento, set: setFPagamento, opts: PAGAMENTI.filter(Boolean) },
+        { label: 'Tipo',      vals: fTipo,      set: setFTipo,      opts: TIPI.filter(Boolean) },
+      ].map(f => (
+        <div key={f.label}>
+          <p className="text-xs text-[#888] font-semibold uppercase tracking-wider mb-2">{f.label}</p>
+          <div className="space-y-1.5">
+            {f.opts.map(opt => {
+              const selected = f.vals.includes(opt)
+              return (
+                <label key={opt} className="flex items-center gap-2 cursor-pointer group">
+                  <div
+                    onClick={() => f.set((prev: string[]) =>
+                      prev.includes(opt) ? prev.filter(v => v !== opt) : [...prev, opt]
+                    )}
+                    className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-all
+                      ${selected
+                        ? 'bg-[#E8162B] border-[#E8162B]'
+                        : 'border-[#555] group-hover:border-[#E8162B]'}`}>
+                    {selected && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    )}
+                  </div>
+                  <span className={`text-sm capitalize ${selected ? 'text-white' : 'text-[#888] group-hover:text-white'} transition-colors`}>
+                    {opt}
+                  </span>
+                </label>
+              )
+            })}
+          </div>
+          {f.vals.length > 0 && (
+            <button onClick={() => f.set([])}
+              className="text-xs text-[#E8162B] hover:underline mt-2">
+              Azzera
+            </button>
           )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
         </div>
 
         {/* Tabella desktop */}
