@@ -169,7 +169,7 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
               <div>
                 <label style={lbl}>Tipo ordine</label>
                 <select style={inp} defaultValue={tipoOrdine}
-                  onChange={e => setTipoOrdine(e.target.value)}>
+                  onChange={e => setTipoOrdine(e.target.value as 'online' | 'in store')}>
                   {TIPI.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
