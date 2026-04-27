@@ -15,37 +15,23 @@ const TIPI      = ['online', 'in store']
 const PAGAMENTI = ['da saldare', 'pagato']
 
 export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
-  const [loading, setLoading]         = useState(false)
-  const [error, setError]             = useState('')
-  const [fornitore, setFornitore]     = useState(ordine?.fornitore || 'manicomics')
-  const [showCustom, setShowCustom]   = useState(false)
+  const [loading, setLoading]             = useState(false)
+  const [error, setError]                 = useState('')
+  const [fornitore, setFornitore]         = useState(ordine?.fornitore ?? 'manicomics')
+  const [showCustom, setShowCustom]       = useState((ordine?.fornitore ?? '') === 'altro')
 
-  // Refs per tutti i campi — nessun re-render al typing
-  const refData           = useState(ordine?.data || new Date().toISOString().split('T')[0])
-  const refNomeCliente    = useState(ordine?.nome_cliente || '')
-  const refContatto       = useState(ordine?.contatto || '')
-  const refTipoOrdine = useState<'online' | 'in store'>(ordine?.tipo_ordine || 'in store')
-  const refNomeArticolo   = useState(ordine?.nome_articolo || '')
-  const refQuantita       = useState(String(ordine?.quantita || 1))
-  const refCosto          = useState(ordine?.costo != null ? String(ordine.costo) : '')
-  const refPrezzoVendita  = useState(ordine?.prezzo_vendita != null ? String(ordine.prezzo_vendita) : '')
-  const refStato          = useState(ordine?.stato || 'da cercare')
-  const refFornitoreCustom = useState(ordine?.fornitore_custom || '')
-  const refPagamento      = useState(ordine?.pagamento || 'da saldare')
-  const refNote           = useState(ordine?.note || '')
-
-  const [data,           setData]           = refData
-  const [nomeCliente,    setNomeCliente]    = refNomeCliente
-  const [contatto,       setContatto]       = refContatto
-  const [tipoOrdine,     setTipoOrdine]     = refTipoOrdine
-  const [nomeArticolo,   setNomeArticolo]   = refNomeArticolo
-  const [quantita,       setQuantita]       = refQuantita
-  const [costo,          setCosto]          = refCosto
-  const [prezzoVendita,  setPrezzoVendita]  = refPrezzoVendita
-  const [stato,          setStato]          = refStato
-  const [fornitoreCustom, setFornitoreCustom] = refFornitoreCustom
-  const [pagamento,      setPagamento]      = refPagamento
-  const [note,           setNote]           = refNote
+  const [data,             setData]             = useState(ordine?.data ?? new Date().toISOString().split('T')[0])
+  const [nomeCliente,      setNomeCliente]      = useState(ordine?.nome_cliente ?? '')
+  const [contatto,         setContatto]         = useState(ordine?.contatto ?? '')
+  const [tipoOrdine,       setTipoOrdine]       = useState(ordine?.tipo_ordine ?? 'in store')
+  const [nomeArticolo,     setNomeArticolo]     = useState(ordine?.nome_articolo ?? '')
+  const [quantita,         setQuantita]         = useState(String(ordine?.quantita ?? 1))
+  const [costo,            setCosto]            = useState(ordine?.costo != null ? String(ordine.costo) : '')
+  const [prezzoVendita,    setPrezzoVendita]    = useState(ordine?.prezzo_vendita != null ? String(ordine.prezzo_vendita) : '')
+  const [stato,            setStato]            = useState(ordine?.stato ?? 'da cercare')
+  const [fornitoreCustom,  setFornitoreCustom]  = useState(ordine?.fornitore_custom ?? '')
+  const [pagamento,        setPagamento]        = useState(ordine?.pagamento ?? 'da saldare')
+  const [note,             setNote]             = useState(ordine?.note ?? '')
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -84,7 +70,8 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
     setLoading(false)
     if (err) { setError(err.message); return }
     onSaved()
-  }, [data, nomeCliente, contatto, tipoOrdine, nomeArticolo, quantita, costo, prezzoVendita, stato, fornitore, fornitoreCustom, pagamento, note, ordine, onSaved])
+  }, [data, nomeCliente, contatto, tipoOrdine, nomeArticolo, quantita, costo,
+      prezzoVendita, stato, fornitore, fornitoreCustom, pagamento, note, ordine, onSaved])
 
   const inp: React.CSSProperties = {
     width: '100%',
@@ -155,117 +142,106 @@ export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
         <div style={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
           padding: '16px 20px',
-          WebkitOverflowScrolling: 'touch' as never,
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {/* Riga 1 */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={lbl}>Data</label>
-                <input type="date" style={inp} defaultValue={data}
-                  onChange={e => setData(e.target.value)} />
+                <input type="date" style={inp}
+                  value={data} onChange={e => setData(e.target.value)} />
               </div>
               <div>
                 <label style={lbl}>Tipo ordine</label>
-                <select style={inp} defaultValue={tipoOrdine}
-                  onChange={e => setTipoOrdine(e.target.value as 'online' | 'in store')}>
+                <select style={inp}
+                  value={tipoOrdine} onChange={e => setTipoOrdine(e.target.value)}>
                   {TIPI.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
             </div>
 
-            {/* Riga 2 */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={lbl}>Nome cliente *</label>
-                <input style={inp} defaultValue={nomeCliente}
-                  onChange={e => setNomeCliente(e.target.value)}
-                  placeholder="Mario Rossi"
-                  autoComplete="off" />
+                <input style={inp}
+                  value={nomeCliente} onChange={e => setNomeCliente(e.target.value)}
+                  placeholder="Mario Rossi" autoComplete="off" />
               </div>
               <div>
                 <label style={lbl}>Contatto</label>
-                <input style={inp} defaultValue={contatto}
-                  onChange={e => setContatto(e.target.value)}
-                  placeholder="Tel / Instagram"
-                  autoComplete="off" />
+                <input style={inp}
+                  value={contatto} onChange={e => setContatto(e.target.value)}
+                  placeholder="Tel / Instagram" autoComplete="off" />
               </div>
             </div>
 
-            {/* Nome articolo */}
             <div>
               <label style={lbl}>Nome articolo *</label>
-              <input style={inp} defaultValue={nomeArticolo}
-                onChange={e => setNomeArticolo(e.target.value)}
-                placeholder="One Piece Vol. 1..."
-                autoComplete="off" />
+              <input style={inp}
+                value={nomeArticolo} onChange={e => setNomeArticolo(e.target.value)}
+                placeholder="One Piece Vol. 1..." autoComplete="off" />
             </div>
 
-            {/* Riga 3 */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={lbl}>Quantità</label>
-                <input type="number" min={1} style={inp} defaultValue={quantita}
-                  onChange={e => setQuantita(e.target.value)} />
+                <input type="number" min={1} style={inp}
+                  value={quantita} onChange={e => setQuantita(e.target.value)} />
               </div>
               <div>
                 <label style={lbl}>Stato</label>
-                <select style={inp} defaultValue={stato}
-                  onChange={e => setStato(e.target.value)}>
+                <select style={inp}
+                  value={stato} onChange={e => setStato(e.target.value)}>
                   {STATI.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
             </div>
 
-            {/* Riga 4 */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={lbl}>Costo acquisto (€)</label>
-                <input type="number" step="0.01" style={inp} defaultValue={costo}
-                  onChange={e => setCosto(e.target.value)} placeholder="0.00" />
+                <input type="number" step="0.01" style={inp}
+                  value={costo} onChange={e => setCosto(e.target.value)}
+                  placeholder="0.00" />
               </div>
               <div>
                 <label style={lbl}>Prezzo vendita (€)</label>
-                <input type="number" step="0.01" style={inp} defaultValue={prezzoVendita}
-                  onChange={e => setPrezzoVendita(e.target.value)} placeholder="0.00" />
+                <input type="number" step="0.01" style={inp}
+                  value={prezzoVendita} onChange={e => setPrezzoVendita(e.target.value)}
+                  placeholder="0.00" />
               </div>
             </div>
 
-            {/* Fornitore */}
             <div style={{ display: 'grid', gridTemplateColumns: showCustom ? '1fr 1fr' : '1fr', gap: 12 }}>
               <div>
                 <label style={lbl}>Fornitore</label>
-                <select style={inp} value={fornitore}
-                  onChange={e => setFornitore(e.target.value)}>
+                <select style={inp}
+                  value={fornitore} onChange={e => setFornitore(e.target.value)}>
                   {FORNITORI.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
               </div>
               {showCustom && (
                 <div>
                   <label style={lbl}>Specifica fornitore</label>
-                  <input style={inp} defaultValue={fornitoreCustom}
-                    onChange={e => setFornitoreCustom(e.target.value)}
+                  <input style={inp}
+                    value={fornitoreCustom} onChange={e => setFornitoreCustom(e.target.value)}
                     placeholder="Nome fornitore..." />
                 </div>
               )}
             </div>
 
-            {/* Pagamento */}
             <div>
               <label style={lbl}>Pagamento</label>
-              <select style={inp} defaultValue={pagamento}
-                onChange={e => setPagamento(e.target.value)}>
+              <select style={inp}
+                value={pagamento} onChange={e => setPagamento(e.target.value)}>
                 {PAGAMENTI.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
 
-            {/* Note */}
             <div>
               <label style={lbl}>Note</label>
               <textarea style={{ ...inp, resize: 'none' }} rows={4}
-                defaultValue={note}
-                onChange={e => setNote(e.target.value)}
+                value={note} onChange={e => setNote(e.target.value)}
                 placeholder="Note libere..." />
             </div>
 
