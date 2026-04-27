@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { X } from 'lucide-react'
@@ -15,23 +16,22 @@ const TIPI      = ['online', 'in store']
 const PAGAMENTI = ['da saldare', 'pagato']
 
 export default function OrdineModal({ ordine, onClose, onSaved }: Props) {
-  const [loading, setLoading]             = useState(false)
-  const [error, setError]                 = useState('')
-  const [fornitore, setFornitore]         = useState(ordine?.fornitore ?? 'manicomics')
-  const [showCustom, setShowCustom]       = useState((ordine?.fornitore ?? '') === 'altro')
-
-  const [data,             setData]             = useState(ordine?.data ?? new Date().toISOString().split('T')[0])
-  const [nomeCliente,      setNomeCliente]      = useState(ordine?.nome_cliente ?? '')
-  const [contatto,         setContatto]         = useState(ordine?.contatto ?? '')
-  const [tipoOrdine,       setTipoOrdine]       = useState(ordine?.tipo_ordine ?? 'in store')
-  const [nomeArticolo,     setNomeArticolo]     = useState(ordine?.nome_articolo ?? '')
-  const [quantita,         setQuantita]         = useState(String(ordine?.quantita ?? 1))
-  const [costo,            setCosto]            = useState(ordine?.costo != null ? String(ordine.costo) : '')
-  const [prezzoVendita,    setPrezzoVendita]    = useState(ordine?.prezzo_vendita != null ? String(ordine.prezzo_vendita) : '')
-  const [stato,            setStato]            = useState(ordine?.stato ?? 'da cercare')
-  const [fornitoreCustom,  setFornitoreCustom]  = useState(ordine?.fornitore_custom ?? '')
-  const [pagamento,        setPagamento]        = useState(ordine?.pagamento ?? 'da saldare')
-  const [note,             setNote]             = useState(ordine?.note ?? '')
+  const [loading, setLoading]            = useState(false)
+  const [error, setError]                = useState('')
+  const [fornitore, setFornitore]        = useState<any>(ordine?.fornitore ?? 'manicomics')
+  const [showCustom, setShowCustom]      = useState((ordine?.fornitore ?? '') === 'altro')
+  const [data, setData]                  = useState(ordine?.data ?? new Date().toISOString().split('T')[0])
+  const [nomeCliente, setNomeCliente]    = useState(ordine?.nome_cliente ?? '')
+  const [contatto, setContatto]          = useState(ordine?.contatto ?? '')
+  const [tipoOrdine, setTipoOrdine]      = useState<any>(ordine?.tipo_ordine ?? 'in store')
+  const [nomeArticolo, setNomeArticolo]  = useState(ordine?.nome_articolo ?? '')
+  const [quantita, setQuantita]          = useState(String(ordine?.quantita ?? 1))
+  const [costo, setCosto]                = useState(ordine?.costo != null ? String(ordine.costo) : '')
+  const [prezzoVendita, setPrezzoVendita] = useState(ordine?.prezzo_vendita != null ? String(ordine.prezzo_vendita) : '')
+  const [stato, setStato]                = useState<any>(ordine?.stato ?? 'da cercare')
+  const [fornitoreCustom, setFornitoreCustom] = useState(ordine?.fornitore_custom ?? '')
+  const [pagamento, setPagamento]        = useState<any>(ordine?.pagamento ?? 'da saldare')
+  const [note, setNote]                  = useState(ordine?.note ?? '')
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
